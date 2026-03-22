@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ShadowPlay Ultimate</title>
+
+<!-- FONTS -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+
+<style>
+
+/* INSANE BLACK + RED DESIGN */
+
+body{
+margin:0;
+font-family:'Poppins', sans-serif;
+color:white;
+background: linear-gradient(-45deg,#000,#1a0000,#000,#300000);
+background-size:400% 400%;
+animation:bg 10s infinite alternate;
+}
+
+@keyframes bg{
+0%{background-position:0% 50%;}
+100%{background-position:100% 50%;}
+}
+
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px;
+background:#000;
+border-bottom:1px solid red;
+}
+
+.logo{
+font-family:'Orbitron';
+text-shadow:0 0 10px red;
+}
+
+nav button{
+background:none;
+color:white;
+border:none;
+margin:5px;
+cursor:pointer;
+}
+
+section{
+display:none;
+padding:20px;
+}
+
+.active{
+display:block;
+}
+
+.grid{
+display:flex;
+gap:15px;
+overflow-x:auto;
+}
+
+.card{
+background:#120000;
+padding:10px;
+border:1px solid red;
+border-radius:10px;
+min-width:180px;
+}
+
+button{
+background:red;
+color:white;
+border:none;
+padding:8px;
+cursor:pointer;
+}
+
+input,select{
+padding:10px;
+margin:5px;
+background:#000;
+color:white;
+border:1px solid red;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+<div class="logo">ShadowPlay</div>
+
+<nav>
+<button onclick="showPage('home')">Home</button>
+<button onclick="showPage('upload')">Upload</button>
+<button onclick="showPage('login')">Login</button>
+<button onclick="showPage('profile')">Profile</button>
+<button onclick="showPage('admin')">Admin</button>
+<button onclick="showPage('dashboard')">Dashboard</button>
+</nav>
+</header>
+
+<!-- HOME -->
+<section id="home" class="active">
+
+<h2>🔥 Trending</h2>
+<div class="grid" id="trending"></div>
+
+<h2>Games</h2>
+<div class="grid" id="games"></div>
+
+<h2>Movies</h2>
+<div class="grid" id="movies"></div>
+
+<h2>Anime</h2>
+<div class="grid" id="anime"></div>
+
+<h2>Series</h2>
+<div class="grid" id="series"></div>
+
+<h2>Music</h2>
+<div class="grid" id="music"></div>
+
+</section>
+
+<!-- UPLOAD -->
+<section id="upload">
+
+<h2>Upload</h2>
+
+<form id="uploadForm">
+<input id="title" placeholder="Title" required>
+
+<select id="category">
+<option value="games">Game</option>
+<option value="movies">Movie</option>
+<option value="anime">Anime</option>
+<option value="series">Series</option>
+<option value="music">Music</option>
+</select>
+
+<input id="image" placeholder="Image URL">
+<input id="link" placeholder="Download link">
+<input id="price" type="number" placeholder="Price">
+
+<button>Upload</button>
+</form>
+
+</section>
+
+<!-- LOGIN -->
+<section id="login">
+
+<h2>Login</h2>
+
+<input id="email" placeholder="Email">
+<input id="password" placeholder="Password">
+
+<button onclick="signup()">Sign Up</button>
+<button onclick="login()">Login</button>
+
+</section>
+
+<!-- PROFILE -->
+<section id="profile">
+
+<h2 id="userEmail"></h2>
+<div class="grid" id="myUploads"></div>
+
+</section>
+
+<!-- ADMIN -->
+<section id="admin">
+
+<h2>Admin Panel</h2>
+<div id="adminContent"></div>
+
+</section>
+
+<!-- DASHBOARD -->
+<section id="dashboard">
+
+<h2>Dashboard</h2>
+
+<p>Downloads: <span id="totalDownloads">0</span></p>
+
+</section>
+
+<script>
+
+// FIREBASE CONFIG
+const firebaseConfig={
+apiKey:"YOUR_KEY",
+authDomain:"YOUR_APP.firebaseapp.com",
+projectId:"YOUR_ID"
+}
+
+firebase.initializeApp(firebaseConfig)
+
+const db=firebase.firestore()
+const auth=firebase.auth()
+
+// NAVIGATION
+function showPage(page){
+document.querySelectorAll("section").forEach(s=>s.classList.remove("active"))
+document.getElementById(page).classList.add("active")
+}
+
+// LOAD CONTENT
+function loadContent(){
+db.collection("content").where("approved","==",true).get()
+.then(snap=>{
+snap.forEach(doc=>{
+let item=doc.data()
+item.id=doc.id
+
+const container=document.getElementById(item.category)
+
+if(container){
+let card=document.createElement("div")
+card.className="card"
+
+card.innerHTML=`
+<img src="${item.image}" width="100%">
+<h3>${item.title}</h3>
+<p>$${item.price}</p>
+<button onclick="download('${item.id}','${item.link}')">Download</button>
+`
+
+container.appendChild(card)
+}
+})
+})
+}
+
+// UPLOAD
+uploadForm.onsubmit=(e)=>{
+e.preventDefault()
+
+const user=auth.currentUser
+
+db.collection("content").add({
+title:title.value,
+category:category.value,
+image:image.value,
+link:link.value,
+price:price.value,
+user:user?user.email:"anon",
+approved:false,
+downloads:0
+})
+
+alert("Uploaded! Waiting approval")
+}
+
+// DOWNLOAD COUNT
+function download(id,link){
+
+db.collection("content").doc(id).get().then(doc=>{
+let d=doc.data().downloads||0
+
+db.collection("content").doc(id).update({
+downloads:d+1
+})
+
+window.open(link)
+})
+}
+
+// LOGIN
+function signup(){
+auth.createUserWithEmailAndPassword(email.value,password.value)
+}
+
+function login(){
+auth.signInWithEmailAndPassword(email.value,password.value)
+}
+
+// PROFILE
+auth.onAuthStateChanged(user=>{
+if(user){
+userEmail.innerText=user.email
+
+db.collection("content").where("user","==",user.email).get()
+.then(snap=>{
+snap.forEach(doc=>{
+let item=doc.data()
+
+let card=document.createElement("div")
+card.className="card"
+card.innerHTML=item.title
+
+myUploads.appendChild(card)
+})
+})
+}
+})
+
+// ADMIN
+function loadAdmin(){
+db.collection("content").get().then(snap=>{
+snap.forEach(doc=>{
+let item=doc.data()
+
+let div=document.createElement("div")
+div.innerHTML=`
+${item.title}
+<button onclick="approve('${doc.id}')">Approve</button>
+<button onclick="del('${doc.id}')">Delete</button>
+`
+adminContent.appendChild(div)
+})
+})
+}
+
+function approve(id){
+db.collection("content").doc(id).update({approved:true})
+}
+
+function del(id){
+db.collection("content").doc(id).delete()
+}
+
+// DASHBOARD
+function loadDashboard(){
+let total=0
+
+db.collection("content").get().then(snap=>{
+snap.forEach(doc=>{
+total+=doc.data().downloads||0
+})
+
+totalDownloads.innerText=total
+})
+}
+
+// INIT
+loadContent()
+loadAdmin()
+loadDashboard()
+
+</script>
+
+</body>
+</html>

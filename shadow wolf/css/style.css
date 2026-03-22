@@ -1,0 +1,173 @@
+
+/* 🔥 FONTS */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;600&display=swap');
+
+/* 🌌 BODY (ANIMATED BACKGROUND) */
+body{
+margin:0;
+font-family:'Poppins', sans-serif;
+color:white;
+
+background: linear-gradient(-45deg,#000000,#1a0000,#000000,#300000);
+background-size:400% 400%;
+animation:bgAnimation 10s infinite alternate;
+}
+
+@keyframes bgAnimation{
+0%{background-position:0% 50%;}
+100%{background-position:100% 50%;}
+}
+
+/* 🔝 HEADER */
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:15px 20px;
+background:rgba(0,0,0,0.9);
+border-bottom:1px solid red;
+position:sticky;
+top:0;
+z-index:1000;
+}
+
+/* 🧠 LOGO */
+.logo{
+font-family:'Orbitron', sans-serif;
+font-size:1.6rem;
+letter-spacing:3px;
+text-transform:uppercase;
+color:white;
+text-shadow:0 0 10px red, 0 0 20px red;
+}
+
+/* 🔗 NAV BUTTONS */
+nav button{
+background:none;
+border:none;
+color:white;
+margin:0 8px;
+cursor:pointer;
+font-weight:600;
+transition:0.3s;
+}
+
+nav button:hover{
+color:red;
+text-shadow:0 0 10px red;
+}
+
+/* 📄 SECTIONS */
+section{
+display:none;
+padding:20px;
+}
+
+.active{
+display:block;
+}
+
+/* 🧾 HEADINGS */
+h2{
+font-family:'Orbitron', sans-serif;
+letter-spacing:2px;
+text-shadow:0 0 10px red;
+}
+
+/* 📦 GRID */
+.grid{
+display:flex;
+gap:15px;
+overflow-x:auto;
+padding-top:10px;
+}
+
+/* 🟥 CARDS */
+.card{
+min-width:180px;
+background:rgba(20,0,0,0.85);
+border-radius:12px;
+padding:10px;
+border:1px solid red;
+transition:0.3s;
+position:relative;
+overflow:hidden;
+}
+
+/* ✨ CARD GLOW EFFECT */
+.card::before{
+content:"";
+position:absolute;
+top:0;
+left:-100%;
+width:100%;
+height:100%;
+background:linear-gradient(120deg, transparent, rgba(255,0,0,0.4), transparent);
+transition:0.5s;
+}
+
+.card:hover::before{
+left:100%;
+}
+
+.card:hover{
+transform:scale(1.08);
+box-shadow:0 0 25px red;
+}
+
+/* 🖼 IMAGE */
+.card img{
+width:100%;
+border-radius:10px;
+}
+
+/* 🔘 BUTTONS */
+button{
+background:red;
+color:white;
+border:none;
+padding:10px;
+margin-top:8px;
+width:100%;
+cursor:pointer;
+font-weight:bold;
+border-radius:6px;
+transition:0.3s;
+}
+
+button:hover{
+background:#ff1a1a;
+box-shadow:0 0 15px red;
+}
+
+/* 🔤 INPUTS */
+input, select{
+padding:10px;
+margin:5px 0;
+width:100%;
+background:#000;
+color:white;
+border:1px solid red;
+border-radius:5px;
+outline:none;
+}
+
+/* ⭐ SCROLLBAR */
+::-webkit-scrollbar{
+height:8px;
+}
+
+::-webkit-scrollbar-thumb{
+background:red;
+border-radius:10px;
+}
+
+/* 🌫 FADE IN */
+body{
+opacity:0;
+animation:fadeIn 1s forwards, bgAnimation 10s infinite alternate;
+}
+
+@keyframes fadeIn{
+to{opacity:1;}
+}
